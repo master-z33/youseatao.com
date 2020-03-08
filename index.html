@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+ <head>
+
+ <script type="text/javascript">
+
+// <![CDATA[
+
+var bits=80; // how many bits
+
+var speed=33; // how fast - smaller is faster
+
+var bangs=5; // how many can be launched simultaneously (note that using too many can slow the script down)
+
+var colours=new Array("#03f", "#f03", "#0e0", "#93f", "#0cf", "#f93", "#f0c");
+
+//                     blue    red     green   purple  cyan    orange  pink
+
+/****************************
+
+*      Fireworks Effect     *
+
+*(c)2013-1 edan web-design*
+
+*  http://infile13blogspot.com  *
+
+* DON'T EDIT BELOW THIS BOX *
+
+****************************/
+
+var bangheight=new Array();
+
+var intensity=new Array();
+
+var colour=new Array();
+
+var Xpos=new Array();
+
+var Ypos=new Array();
+
+var dX=new Array();
+
+var dY=new Array();
+
+var stars=new Array();
+
+var decay=new Array();
+
+var swide=800;
+
+var shigh=600;
+
+var boddie;
+
+window.onload=function() { if (document.getElementById) {
+
+var i;
+
+boddie=document.createElement("div");
+
+boddie.style.position="fixed";
+
+boddie.style.top="0px";
+
+boddie.style.left="0px";
+
+boddie.style.overflow="visible";
+
+boddie.style.width="1px";
+
+boddie.style.height="1px";
+
+boddie.style.backgroundColor="transparent";
+
+document.body.appendChild(boddie);
+
+set_width();
+
+for (i=0; i<bangs; i++) {
+
+write_fire(i);
+
+launch(i);
+
+setInterval('stepthrough('+i+')', speed);
+
+}
+
+}}
+
+function write_fire(N) {
+
+var i, rlef, rdow;
+
+stars[N+'r']=createDiv('|', 12);
+
+boddie.appendChild(stars[N+'r']);
+
+for (i=bits*N; i<bits+bits*N; i++) {
+
+stars[i]=createDiv('*', 13);
+
+boddie.appendChild(stars[i]);
+
+}
+
+}
+
+function createDiv(char, size) {
+
+var div=document.createElement("div");
+
+div.style.font=size+"px monospace";
+
+div.style.position="absolute";
+
+div.style.backgroundColor="transparent";
+
+div.appendChild(document.createTextNode(char));
+
+return (div);
+
+}
+
+function launch(N) {
+
+colour[N]=Math.floor(Math.random()*colours.length);
+
+Xpos[N+"r"]=swide*0.5;
+
+Ypos[N+"r"]=shigh-5;
+
+bangheight[N]=Math.round((0.5+Math.random())*shigh*0.4);
+
+dX[N+"r"]=(Math.random()-0.5)*swide/bangheight[N];
+
+if (dX[N+"r"]>1.25) stars[N+"r"].firstChild.nodeValue="/";
+
+else if (dX[N+"r"]<-1.25) stars[N+"r"].firstChild.nodeValue="\\";
+
+else stars[N+"r"].firstChild.nodeValue="|";
+
+stars[N+"r"].style.color=colours[colour[N]];
+
+}
+
+function bang(N) {
+
+var i, Z, A=0;
+
+for (i=bits*N; i<bits+bits*N; i++) {
+
+Z=stars[i].style;
+
+Z.left=Xpos[i]+"px";
+
+Z.top=Ypos[i]+"px";
+
+if (decay[i]) decay[i]--;
+
+else A++;
+
+if (decay[i]==15) Z.fontSize="7px";
+
+else if (decay[i]==7) Z.fontSize="2px";
+
+else if (decay[i]==1) Z.visibility="hidden";
+
+Xpos[i]+=dX[i];
+
+Ypos[i]+=(dY[i]+=1.25/intensity[N]);
+
+}
+
+if (A!=bits) setTimeout("bang("+N+")", speed);
+
+}
+
+function stepthrough(N) {
+
+var i, M, Z;
+
+var oldx=Xpos[N+"r"];
+
+var oldy=Ypos[N+"r"];
+
+Xpos[N+"r"]+=dX[N+"r"];
+
+Ypos[N+"r"]-=4;
+
+if (Ypos[N+"r"]<bangheight[N]) {
+
+M=Math.floor(Math.random()*3*colours.length);
+
+intensity[N]=5+Math.random()*4;
+
+for (i=N*bits; i<bits+bits*N; i++) {
+
+Xpos[i]=Xpos[N+"r"];
+
+Ypos[i]=Ypos[N+"r"];
+
+dY[i]=(Math.random()-0.5)*intensity[N];
+
+dX[i]=(Math.random()-0.5)*(intensity[N]-Math.abs(dY[i]))*1.25;
+
+decay[i]=16+Math.floor(Math.random()*16);
+
+Z=stars[i];
+
+if (M<colours.length) Z.style.color=colours[i%2?colour[N]:M];
+
+else if (M<2*colours.length) Z.style.color=colours[colour[N]];
+
+else Z.style.color=colours[i%colours.length];
+
+Z.style.fontSize="13px";
+
+Z.style.visibility="visible";
+
+}
+
+bang(N);
+
+launch(N);
+
+}
+
+stars[N+"r"].style.left=oldx+"px";
+
+stars[N+"r"].style.top=oldy+"px";
+
+}
+
+window.onresize=set_width;
+
+function set_width() {
+
+var sw_min=999999;
+
+var sh_min=999999;
+
+if (document.documentElement && document.documentElement.clientWidth) {
+
+if (document.documentElement.clientWidth>0) sw_min=document.documentElement.clientWidth;
+
+if (document.documentElement.clientHeight>0) sh_min=document.documentElement.clientHeight;
+
+}
+
+if (typeof(self.innerWidth)!="undefined" && self.innerWidth) {
+
+if (self.innerWidth>0 && self.innerWidth<sw_min) sw_min=self.innerWidth;
+
+if (self.innerHeight>0 && self.innerHeight<sh_min) sh_min=self.innerHeight;
+
+}
+
+if (document.body.clientWidth) {
+
+if (document.body.clientWidth>0 && document.body.clientWidth<sw_min) sw_min=document.body.clientWidth;
+
+if (document.body.clientHeight>0 && document.body.clientHeight<sh_min) sh_min=document.body.clientHeight;
+
+}
+
+if (sw_min==999999 || sh_min==999999) {
+
+sw_min=800;
+
+sh_min=600;
+
+}
+
+swide=sw_min;
+
+shigh=sh_min;
+
+}
+
+// ]]>
+
+</script>
+
+<style>
+
+td{align: center; font-family: Bradley Hand ITC;
+
+font-size: 12pt; color: white}
+
+a{align: center; font-family: Bradley Hand ITC; font-size: 12pt; color: red}
+
+</style>
+
+<div
+
+style="text-align:center;"><div
+
+class="phdr"></div>
+
+<SCRIPT>
+
+var width=document.body.clientWidth;
+
+var height=document.body.clientHeight;
+
+function doClickText(who,type,step,timeOut) {
+
+document.getElementById(who).style.display="none";
+
+if(type==0) {
+
+reveal('revealDiv1',step,timeOut,0);
+
+reveal('revealDiv2',step,timeOut,1);}
+
+if(type==1) {
+
+reveal('revealDiv1',step,timeOut,2);
+
+reveal('revealDiv2',step,timeOut,3);}}
+
+function reveal(who,step,timeOut,type) {
+
+if(type==0)
+
+var where="top";
+
+if(type==1)
+
+var where="bottom";
+
+if(type==2)
+
+var where="left";
+
+if(type==3)
+
+var where="right";
+
+eval('var temp=document.getElementById(who).style.'+where);
+
+temp=parseInt(temp);
+
+if(type==0||type==1)
+
+var checkWith=height/2;
+
+if(type==2||type==3)
+
+var checkWith=width/2;
+
+if(-temp<checkWith) {
+
+temp-=step;
+
+eval('document.getElementById(who).style.'+where+'=temp;');
+
+setTimeout("reveal('"+who+"',"+step+",'"+timeOut+"',"+type+")", timeOut);}
+
+else {
+
+document.getElementById(who).style.display="none";
+
+document.body.scroll="yes";}}
+
+function initReveal(type,div1bg,div2bg,div1bw,div2bw,div1bc,div2bc,step,timeOut,click) {
+
+if(type==0) {
+
+var bWhere1="border-bottom";
+
+var bWhere2="border-top";
+
+var putZero1="top:0px; left:0px";
+
+var putZero2="bottom:0px; left:0px";
+
+document.write('<div id="revealDiv1" style="z-index:100; display:block; position:absolute; '+putZero1+'; background:'+div1bg+' ; width:'+(width)+'; height:'+(height/2)+'; '+bWhere1+':'+div1bc+' solid '+div1bw+'px"></div>');
+
+document.write('<div id="revealDiv2" style="z-index:100; display:block; position:absolute; '+putZero2+'; background:'+div2bg+' ; width:'+(width)+'; height:'+(height/2)+'; '+bWhere2+':'+div2bc+' solid '+div2bw+'px"></div>');
+
+if(!click) {
+
+reveal('revealDiv1',step,timeOut,0);
+
+reveal('revealDiv2',step,timeOut,1);}
+
+else {
+
+clickText(type,step,timeOut);}}
+
+if(type==1) {
+
+var bWhere1="border-right";
+
+var bWhere2="border-left";
+
+var putZero1="top:0px; left:0px";
+
+var putZero2="top:0px; right:0px";
+
+document.write('<div id="revealDiv1" style="z-index:100; display:block; position:absolute; '+putZero1+'; background:'+div1bg+' ; width:'+(width/2)+'; height:'+(height)+'; '+bWhere1+':'+div1bc+' solid '+div1bw+'px"></div>');
+
+document.write('<div id="revealDiv2" style="z-index:100; display:block; position:absolute; '+putZero2+'; background:'+div2bg+' ; width:'+(width/2)+'; height:'+(height)+'; '+bWhere2+':'+div2bc+' solid '+div2bw+'px"></div>');
+
+if(!click) {
+
+reveal('revealDiv1',step,timeOut,2);
+
+reveal('revealDiv2',step,timeOut,3);}
+
+else {
+
+clickText(type,step,timeOut);}}
+
+function clickText(type,step,timeOut) {
+
+document.write('<div id="clickText" style="z-index:101; display:block; position:absolute; top:'+(height/2-clickh/2-clickb)+'; left:'+(width/2-clickw/2-clickb)+'"><table style="border:'+clickc+' solid '+clickb+'px; background:'+clickbg+' ;width:'+clickw+'px; height:'+clickh+'; '+clickFont+'; cursor:hand; cursor:pointer" onClick="doClickText(\'clickText\','+type+','+step+','+timeOut+')"><tr><td align="middle">'+clickt+'</td></tr></table></div>');}}
+
+</SCRIPT><SCRIPT>
+
+var clickw=270;
+
+var clickh=20;
+
+var clickb=2;
+
+var clickc="aqua";
+
+var clickbg="aqua"; // Background color
+
+</SCRIPT>
+
+	 <title>Hacked By Master_Z</title>	 <meta charset="UTF-8"/>
+
+	 <meta content="Your System Is Dead,Hacked By Master_Z || Spongebob Cyber Team" name="description">
+
+<meta content="2020" name="copyright">
+
+<meta content="MASTER_Z" name="author">
+
+<meta content="Hacked by Master_Z,SpongeBob Cyber Team" name="keywords">
+
+<meta content="https://pomf.davebay.net/files/hdevgdox.jpg" property="og:image">
+
+<link rel="shortcut icon" href="" type="image/x-icon">
+
+<link href="https://fonts.googleapis.com/css?family=Lacquer&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css?family=Iceberg&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css?family=Oxanium&display=swap" rel="stylesheet">
+
+	 <link rel="stylesheet" href="" type="text/css"/>
+
+	 <style>
+
+	 font1 {font-family: 'Lacquer', ; font-size: '9px 11px', ; font-color: 'blue',;}
+
+	 img[alt*="www.000webhost.com"]{ display:none }
+
+	 </style>
+
+ </head>
+
+	 <body bgcolor="black">
+
+	<center>
+
+	<img src="https://pomf.salm.one/ewtauq.gif" width="90%" height="90%"></center>
+
+	<center>
+
+	<font color="white">
+
+	<font face="Iceberg">
+
+	<font size="9">Hacked By Master_Z<br><br><font face="Lacquer "><font size="7">Pak Presiden Jokowi Saya Ingin Bertanya!!<br>Mengapa Banyak Sekali Pengemis dijalanan Yang<br>Kelaparan? Padahal Mereka Memilih Anda<br>Untuk Menjadi Presiden Tapi Kenapa Bapak Tidak Memperdulikan Mereka Yang<br>Kelaparan? Apakah Ini Balasan Dari Bapak?!!!!<br><br><font face=" Oxanium">WAKTU ADALAH ADALAH UANG<br><style>h1,h2,p,a{
+
+		font-family: sans-serif;
+
+		font-weight: normal;
+
+	}
+
+ 
+
+	.jam_analog_malasngoding {
+
+		background: #e7f2f7;
+
+		position: relative;
+
+		width: 240px;
+
+		height: 240px;
+
+		border: 16px solid #52b6f0;
+
+		border-radius: 50%;
+
+		padding: 20px;
+
+		margin:20px auto;
+
+	}
+
+ 
+
+	.xxx {
+
+		height: 100%;
+
+		width: 100%;
+
+		position: relative;
+
+	}
+
+ 
+
+	.jarum {
+
+		position: absolute;
+
+		width: 50%;
+
+		background: #232323;
+
+		top: 50%;
+
+		transform: rotate(90deg);
+
+		transform-origin: 100%;
+
+		transition: all 0.05s cubic-bezier(0.1, 2.7, 0.58, 1);
+
+	}
+
+ 
+
+	.lingkaran_tengah {
+
+		width: 24px;
+
+		height: 24px;
+
+		background: #232323;
+
+		border: 4px solid #52b6f0;
+
+		position: absolute;
+
+		top: 50%;
+
+		left: 50%;
+
+		margin-left: -14px;
+
+		margin-top: -14px;
+
+		border-radius: 50%;
+
+	}
+
+ 
+
+	.jarum_detik {
+
+		height: 2px;
+
+		border-radius: 1px;
+
+		background: #F0C952;
+
+	}
+
+ 
+
+	.jarum_menit {
+
+		height: 4px;
+
+		border-radius: 4px;
+
+	}
+
+ 
+
+	.jarum_jam {
+
+		height: 8px;
+
+		border-radius: 4px;
+
+		width: 35%;
+
+		left: 15%;
+
+	}
+
+</style><br><div class="jam_analog_malasngoding">
+
+	<div class="xxx">
+
+		<div class="jarum jarum_detik"></div>
+
+		<div class="jarum jarum_menit"></div>
+
+		<div class="jarum jarum_jam"></div>
+
+		<div class="lingkaran_tengah"></div>
+
+	</div><br><script type="text/javascript">
+
+	const secondHand = document.querySelector('.jarum_detik');
+
+	const minuteHand = document.querySelector('.jarum_menit');
+
+	const jarum_jam = document.querySelector('.jarum_jam');
+
+ 
+
+	function setDate(){
+
+		const now = new Date();
+
+ 
+
+		const seconds = now.getSeconds();
+
+		const secondsDegrees = ((seconds / 60) * 360) + 90;
+
+		secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+
+		if (secondsDegrees === 90) {
+
+			secondHand.style.transition = 'none';
+
+		} else if (secondsDegrees >= 91) {
+
+			secondHand.style.transition = 'all 0.05s cubic-bezier(0.1, 2.7, 0.58, 1)'
+
+		}
+
+ 
+
+		const minutes = now.getMinutes();
+
+		const minutesDegrees = ((minutes / 60) * 360) + 90;
+
+		minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
+
+ 
+
+		const hours = now.getHours();
+
+		const hoursDegrees = ((hours / 12) * 360) + 90;
+
+		jarum_jam.style.transform = `rotate(${hoursDegrees}deg)`;
+
+	}
+
+ 
+
+	setInterval(setDate, 1000)
+
+</script><br><br><font face="Lacquer"><font size="7">My Family SCT<br><marquee><font color="red"><font face=" Oxanium"><font size=" 9">Master_Z<font color=" white">-MR.SPONGEBOB-SPONGEBOB-F3RGUSO-MR.GARRY-./CRYMERA-./CYNAX-TN.ERROR404-./S4BUN_COL3K-TN.SQUIDWARD-MR.SQUIDWARD-CRACK_ID-./TN.1NJ3CT0R-FEBRY18-JACKSANS-RIDHO-TN.DEEP7-NEWBIE_ID-1AM4L0NE-./Alfaridzi404</marquee><br>
+
+	<br>
+
+	<br>
+
+	<font face="Lacquer"><font color="white"><font size="7">My Friends<br><marquee><font color="red"><font face="Oxanium"><font size="9">Kingbee-Mbeet-Tn.Koclok}{Ploit-CONNOR9K-./Misetya-Bacot Amat:v-Benjamin007-Bochil Gans-Galang Gans-./Rz42-Faiz-Ganz.xploiter-Root@Xsec-Gilberzx-MR.REY-MR.BROWEN-D4FF4-MR.THEMEH-REVOER-TANAMA-HANZ_SOLO-MR.CRAY-MR.BADUT-RIZAL_Zzx-./Xixzuan-GUA PATAH HATI:V-TN.DEADCRASH-./DR4GON26-IPHING-AND YOU</marquee></center>
+
+	<br>
+
+	<br><br>
+
+	<br>
+
+	<center>
+
+	<font face="Oxanium"><font size="5">COPYRIGHT BY MASTER_Z</font>
+
+	</center>
+
+	<iframe width="0" height="0" src="https://g.top4top.io/m_15229db7y1.mp3" frameborder="0" allowfullscreen; repeat></iframe>
+
+	</center>
+
+	 </body>
+
+ </html> 
